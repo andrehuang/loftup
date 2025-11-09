@@ -1,0 +1,52 @@
+# Environment Args
+output_root: 'output_dir'
+pytorch_data_dir: 'datasets'
+
+# Dataset args
+dataset: "cocostuff"
+
+# Model Args
+model_type: "dinov2"
+activation_type: "token"
+
+# Upsampling args
+upsampler_type: "loftup"
+upsampler_num_layers: 2
+color_feats: true
+
+# Training args
+batch_size: 8
+epochs: 100
+num_workers: 4
+lr: 1e-4
+load_size: 224
+upsample_size: 224
+num_gpus: 1
+
+# Jittering args
+n_jitters: 4
+max_pad: 8
+max_zoom: 0.1
+max_rotate: 5
+
+# Loss weights
+tv_weight: 0.01
+filter_ent_weight: 0.0
+sam_mask_reg: 0.0
+
+# Other args
+random_projection: 64
+outlier_detection: false
+multilayer: false
+zoom_only: false
+multi_upsample_size: false
+clamp_featup: true
+aug_size: false
+downsampler_type: "attention"
+sam_mask_alpha: 0.8
+
+# No need to change
+hydra:
+  run:
+    dir: "."
+  output_subdir: ~ 
