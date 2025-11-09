@@ -74,7 +74,6 @@ class LoftUpStage2(pl.LightningModule):
                  use_crop_upsampler,
                  cfg=None,
                  use_featup=False, # Default changed to False
-                 multilayer=False,
                  zoom_only=False,
                  upsample_size=224,
                  multi_upsample_size=False,
@@ -96,7 +95,6 @@ class LoftUpStage2(pl.LightningModule):
         self.filter_ent_weight = filter_ent_weight
         self.tv_weight = tv_weight
         self.chkpt_dir = chkpt_dir
-        self.multilayer = multilayer
         self.zoom_only = zoom_only
         self.upsample_size = upsample_size
         self.multi_upsample_size = multi_upsample_size
@@ -173,19 +171,6 @@ class LoftUpStage2(pl.LightningModule):
         """
         return project(feats, proj)
 
-    def forward_all_layer_list(self, img):
-        """Extract features from all layers."""
-        if self.multilayer:
-            with torch.no_grad():
-                feats = self.model(img, output_hidden_states=True)
-                if hasattr(feats, 'hidden_states'):
-                    return feats.hidden_states
-                else:
-                    return [feats]
-        else:
-            with torch.no_grad():
-                feats = self.model(img)
-                return [feats]
 
     def training_step(self, batch, batch_idx):
         """Training step with high-resolution supervision."""
@@ -481,7 +466,6 @@ def my_app(cfg: DictConfig) -> None:
         use_crop_upsampler=cfg.use_crop_upsampler,
         cfg=cfg,
         use_featup=cfg.use_featup,
-        multilayer=cfg.multilayer,
         zoom_only=cfg.zoom_only,
         upsample_size=cfg.upsample_size,
         multi_upsample_size=cfg.multi_upsample_size,

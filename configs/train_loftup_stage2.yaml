@@ -56,7 +56,6 @@ sam_mask_hr_reg: 0.0
 # Other args
 random_projection: 64
 outlier_detection: false
-multilayer: false
 zoom_only: false
 multi_upsample_size: false
 clamp_featup: false

@@ -38,25 +38,6 @@ from training_utils import (
     create_random_projection, get_kernel_size
 )
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class LoftUpStage1(pl.LightningModule):
     """LoftUp Stage 1 training module for feature upsampling."""
     
@@ -77,7 +58,6 @@ class LoftUpStage1(pl.LightningModule):
                  upsampler,
                  downsampler,
                  chkpt_dir,
-                 multilayer=False,
                  zoom_only=False,
                  cfg=None,
                  upsample_size=224,
@@ -101,7 +81,6 @@ class LoftUpStage1(pl.LightningModule):
         self.filter_ent_weight = filter_ent_weight
         self.tv_weight = tv_weight
         self.chkpt_dir = chkpt_dir
-        self.multilayer = multilayer
         self.zoom_only = zoom_only
         self.upsample_size = upsample_size
         self.multi_upsample_size = multi_upsample_size
@@ -185,11 +164,6 @@ class LoftUpStage1(pl.LightningModule):
 
         # Extract features
         with torch.no_grad():
-            if self.multilayer:
-                # For multilayer models, extract features from specific layers
-                lr_feat_list = self.model.forward_all_layer_list(img)
-                final_lr_feats = lr_feat_list[2::3]  # Take every 3rd layer starting from index 2
-            else:
                 lr_feats = self.model(img)
                 final_lr_feats = lr_feats
 
@@ -247,7 +221,7 @@ class LoftUpStage1(pl.LightningModule):
             if self.clamp_featup:
                 rec_loss = torch.clamp(rec_loss, min=0.0)
             
-            full_rec_loss = full_rec_loss + rec_loss
+                full_rec_loss = full_rec_loss + rec_loss
 
             # Compute CRF loss (only for first jitter)
 
@@ -274,10 +248,7 @@ class LoftUpStage1(pl.LightningModule):
 
         # Apply SAM mask adjustment if enabled
         if self.sam_mask_alpha > 0.0:
-            if isinstance(final_lr_feats, list):
-                lr_feat = final_lr_feats[-1]
-            else:
-                lr_feat = final_lr_feats
+            lr_feat = final_lr_feats
             
             # Create bilinear upsampled features for comparison
             up_bilinear_features = F.interpolate(lr_feat, size=(guidance_img.shape[2], guidance_img.shape[3]), mode='bicubic')
@@ -339,12 +310,8 @@ class LoftUpStage1(pl.LightningModule):
                     guidance_img = img
 
                 # Extract features
-                if self.multilayer:
-                    lr_feat_list = self.model.forward_all_layer_list(img)
-                    final_lr_feats = lr_feat_list[2::3]
-                else:
-                    lr_feats = self.model(img)
-                    final_lr_feats = lr_feats
+                lr_feats = self.model(img)
+                final_lr_feats = lr_feats
 
                 # Upsample features
                 hr_feats = self.upsampler(final_lr_feats, guidance_img)
@@ -384,10 +351,7 @@ class LoftUpStage1(pl.LightningModule):
                 down_jit_feats = self.downsampler(hr_jit_feats, jit_img)
 
                 # PCA visualization
-                if isinstance(final_lr_feats, list):
-                    lr_feat = final_lr_feats[-1]
-                else:
-                    lr_feat = final_lr_feats
+                lr_feat = final_lr_feats
                 
                 [red_lr_feats], fit_pca = pca([lr_feat[0].unsqueeze(0)])
                 [red_hr_feats], _ = pca([hr_feats[0].unsqueeze(0)], fit_pca=fit_pca)
@@ -481,7 +445,6 @@ def my_app(cfg: DictConfig) -> None:
         upsampler=cfg.upsampler_type,
         downsampler=cfg.downsampler_type,
         chkpt_dir=chkpt_dir,
-        multilayer=cfg.multilayer,
         zoom_only=cfg.zoom_only,
         cfg=cfg,
         upsample_size=upsample_size,
