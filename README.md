@@ -100,8 +100,49 @@ For open-vocabulary segmentation, please check out [ProxyCLIP](https://github.co
 For depth and normal estimation, please check out [Probe3D](https://github.com/mbanani/probe3d).
 
 
-## Training LoftUp
-We will provide training code soon.
+## Training LoftUp Upsamplers
+
+This repository contains training scripts for training LoftUp upsamplers. The training is done in two stages:
+
+### Stage 1: Basic Feature Upsampling
+
+Stage 1 training (`train_loftup_stage1.py`) trains upsamplers to convert low-resolution features to high-resolution features using reconstruction loss.
+
+**Example training command:**
+```bash
+python train_loftup_stage1.py ++dataset="sa1b" ++epochs=1 ++batch_size=2 ++num_gpus=4 ++model_type="dinov2" ++pytorch_data_dir='datasets' ++upsampler_type="loftup" ++sam_mask_alpha=0.8 ++load_size=224 ++upsample_size=224 ++tv_weight=0.001 ++clamp_featup=True
+```
+
+### Stage 2: High-Resolution Supervision
+
+Stage 2 training (`train_loftup_stage2.py`) fine-tunes the Stage 1 upsampler with high-resolution supervision for improved quality.
+
+**Example training command:**
+```bash
+python train_loftup_stage2.py ++dataset="sa1b" ++epochs=1 ++hr_res=896 ++batch_size=2 ++consistency_method="bilinear" ++model_type="dinov2" ++num_gpus=4 ++affinity_loss=True ++pytorch_data_dir='datasets' ++pretrained_upsampler="path/to/stage1_checkpoint.ckpt" ++upsampler_type="loftup" ++sam_mask_hr_alpha=0.5 ++sam_mask_reg=0.0 ++lr=1e-3 ++use_featup=False ++aug_size ++n_jitters=2
+```
+
+### Configuration
+
+Both training scripts use Hydra for configuration management. Configuration files are located in `configs/`:
+- `configs/train_loftup_stage1.yaml` - Stage 1 configuration
+- `configs/train_loftup_stage2.yaml` - Stage 2 configuration
+
+**Key configuration parameters:**
+- `model_type`: Feature extractor type (e.g., "dinov2", "clip")
+- `upsampler_type`: Type of upsampler to train (e.g., "loftup")
+- `batch_size`: Training batch size
+- `epochs`: Number of training epochs
+- `lr`: Learning rate
+- `load_size`: Input image size for feature extraction
+- `upsample_size`: Target size for upsampled features
+- `n_jitters`: Number of jittering augmentations per training step
+- `tv_weight`: Weight for total variation loss
+- `sam_mask_alpha`: Weight for SAM mask adjustment (Stage 1)
+- `sam_mask_hr_alpha`: Weight for SAM mask adjustment (Stage 2)
+
+
+For more details, see the configuration files in `configs/` and the training scripts themselves.
 
 ## Citation
 If you find our work helpful, please cite:

@@ -1,0 +1,69 @@
+# Environment Args
+output_root: 'output_dir'
+pytorch_data_dir: 'datasets'
+
+# Dataset args
+dataset: "sa1b"
+
+# Model Args
+model_type: "dinov2"
+activation_type: "token"
+
+# High-Resolution Training args
+hr_res: 896
+hr_weight: 20.0
+consistency_method: "bilinear"
+
+# Upsampling args
+upsampler_type: "loftup"
+n_freqs: 20
+use_featup: false
+
+# Training args
+batch_size: 2
+epochs: 1
+num_workers: 4
+lr: 1e-3
+load_size: 224
+upsample_size: 224
+num_gpus: 4
+
+# Jittering args
+n_jitters: 2
+max_pad: 8
+max_zoom: 0.1
+max_rotate: 5
+
+# Loss weights
+tv_weight: 0.05
+filter_ent_weight: 0.0
+rec_weight: 1.0
+
+# Advanced features
+affinity_loss: true
+l1_affinity: false
+use_prototypes: false
+use_crop_upsampler: true
+
+# Pretrained upsampler
+pretrained_upsampler: "path/to/stage1_checkpoint.ckpt"
+
+# SAM mask parameters
+sam_mask_reg: 0.0
+sam_mask_hr_alpha: 0.5
+sam_mask_hr_reg: 0.0
+
+# Other args
+random_projection: 64
+outlier_detection: false
+zoom_only: false
+multi_upsample_size: false
+clamp_featup: false
+aug_size: true
+downsampler_type: "attention"
+
+# No need to change
+hydra:
+  run:
+    dir: "."
+  output_subdir: ~ 

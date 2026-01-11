@@ -151,7 +151,7 @@ class Bilinear(torch.nn.Module):
         _, _, h, w = img.shape
         return F.interpolate(feats, (h, w), mode="bilinear")
 
-def get_upsampler(upsampler, dim, lr_size=16, n_freqs=20, cfg=None, cat_lr_feats=True, lr_pe_type="sine"):
+def get_upsampler(upsampler, dim, lr_size=16, n_freqs=20, cfg=None, lr_pe_type="sine"):
     if upsampler == "loftup":
         return LoftUp(dim, n_freqs=n_freqs, lr_size=lr_size, lr_pe_type=lr_pe_type)
     elif upsampler == "bilinear":
