@@ -171,6 +171,14 @@ class LoftUpStage2(pl.LightningModule):
         """
         return project(feats, proj)
 
+    def _project_simple(self, feats, proj):
+        """Default projection (same as project)."""
+        return project(feats, proj)
+
+    def _project_with_uncertainty(self, feats, proj):
+        """Projection when uncertainty is enabled (currently identical)."""
+        return project(feats, proj)
+
 
     def training_step(self, batch, batch_idx):
         """Training step with high-resolution supervision."""
