@@ -17,6 +17,7 @@ import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
 import torchvision.transforms as T
+import torchvision.transforms.functional as TF
 from omegaconf import DictConfig, OmegaConf
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
@@ -490,7 +491,7 @@ def my_app(cfg: DictConfig) -> None:
         norm])
     
     target_transform = T.Compose([
-        T.Lambda(lambda mask: torch.from_numpy(mask).float().unsqueeze(0)), 
+        T.Lambda(lambda mask: TF.pil_to_tensor(mask).float()), 
         T.Resize(load_size, InterpolationMode.NEAREST),
         T.CenterCrop(load_size),
     ])
