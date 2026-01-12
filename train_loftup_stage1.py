@@ -25,11 +25,11 @@ from pytorch_lightning.strategies import DDPStrategy
 from torch.utils.data import DataLoader
 from torchvision.transforms import InterpolationMode
 
-from upsamplers import get_upsampler, load_upsampler_weights
+from upsamplers import get_upsampler, load_upsampler_weights, norm, unnorm
 from datasets import get_dataset
 from featurizers import get_featurizer
 from utils import (
-    pca, norm, unnorm, prep_image, adjust_features_with_masks, 
+    pca, prep_image, adjust_features_with_masks, 
     mask_feature_similarity_loss
 )
 from training_utils import (
