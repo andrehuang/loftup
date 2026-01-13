@@ -169,6 +169,7 @@ class LoftUpStage1(pl.LightningModule):
         img = F.interpolate(original_img, size=(input_img_size, input_img_size), mode='bilinear')
         guidance_img = F.interpolate(guidance_img, size=(input_img_size, input_img_size), mode='bilinear')
         if binary_masks is not None:
+            binary_masks = binary_masks.unsqueeze(1)
             binary_masks = F.interpolate(binary_masks, size=(input_img_size, input_img_size), mode='nearest')
 
         # Extract features
@@ -312,6 +313,7 @@ class LoftUpStage1(pl.LightningModule):
                 if isinstance(batch, dict):
                     img = batch['img']
                     binary_masks = batch['label']
+                    binary_masks = binary_masks.unsqueeze(1)
                     guidance_img = F.interpolate(img, size=(self.upsample_size, self.upsample_size), mode='bilinear')
                     binary_masks = F.interpolate(binary_masks, size=(self.upsample_size, self.upsample_size), mode='nearest')
                 else:

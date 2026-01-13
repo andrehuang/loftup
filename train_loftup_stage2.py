@@ -209,6 +209,7 @@ class LoftUpStage2(pl.LightningModule):
         original_binary_masks = binary_masks
         img = F.interpolate(original_img, input_img_size, mode='bilinear')  # 224x224 global image
         if binary_masks is not None:
+            binary_masks = binary_masks.unsqueeze(1)
             binary_masks = F.interpolate(binary_masks, input_img_size, mode='nearest')
 
         # Extract features from global image
