@@ -50,7 +50,9 @@ class SA1B(Dataset):
         self.label_transform = target_transform
         self.max_mask = max_mask
 
-        assert self.split in ["train"]
+        # SA-1B ships without a validation split; the training scripts request
+        # "val" to build a small validation loader, so treat it like "train".
+        assert self.split in ["train", "val"]
 
 
         self.image_files = []
