@@ -34,7 +34,7 @@ class SingleImageDataset(Dataset):
         return self.ds[self.i]
 
 
-def get_dataset(dataroot, name, split, transform, target_transform, include_labels, sample_size=100000):
+def get_dataset(dataroot, name, split, transform, target_transform, include_labels, sample_size=None):
     if name == 'cocostuff':
         return Coco(dataroot, split, transform, target_transform, include_labels=include_labels)
     elif name == 'cityscapes':

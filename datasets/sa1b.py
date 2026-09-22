@@ -42,7 +42,7 @@ class SA1B(Dataset):
                  transform,
                  target_transform,
                  max_mask=150,
-                 sample_size=100000):
+                 sample_size=None):
         super(SA1B, self).__init__()
         self.split = split
         self.root = join(root, "sa1b")
@@ -55,13 +55,15 @@ class SA1B(Dataset):
 
         self.image_files = []
         self.label_files = []
-        for img in glob.glob(join(self.root, "*.jpg")):
+        for img in sorted(glob.glob(join(self.root, "*.jpg"))):
             self.image_files.append(img)
             label = img.replace('jpg', 'json')
             self.label_files.append(label)
         
-        self.image_files = self.image_files[:sample_size]
-        self.label_files = self.label_files[:sample_size]
+        # Optionally keep only the first `sample_size` images (None = use all).
+        if sample_size is not None:
+            self.image_files = self.image_files[:sample_size]
+            self.label_files = self.label_files[:sample_size]
 
     def __len__(self):
         return len(self.image_files)

@@ -2,7 +2,7 @@
 LoftUp Stage 1 Training Script
 
 Example training command:
-python train_loftup_stage1.py ++dataset="sa1b" ++epochs=1 ++batch_size=2 ++num_gpus=4 ++model_type="dinov2" ++pytorch_data_dir='datasets' ++upsampler_type="loftup" ++sam_mask_alpha=0.8 ++load_size=224 ++upsample_size=224 ++tv_weight=0.001 ++clamp_featup=True
+python train_loftup_stage1.py ++dataset="sa1b" ++sample_size=1000000 ++epochs=1 ++batch_size=2 ++num_gpus=4 ++model_type="dinov2" ++pytorch_data_dir='datasets' ++upsampler_type="loftup" ++sam_mask_alpha=0.8 ++load_size=224 ++upsample_size=224 ++tv_weight=0.001 ++clamp_featup=True
 
 This script trains upsamplers to convert low-resolution features to high-resolution features.
 """
@@ -486,7 +486,8 @@ def my_app(cfg: DictConfig) -> None:
         "train",
         transform=transform,
         target_transform=target_transform,
-        include_labels=False)
+        include_labels=False,
+        sample_size=cfg.sample_size)
 
     loader = DataLoader(
         dataset, cfg.batch_size, shuffle=True, num_workers=cfg.num_workers)

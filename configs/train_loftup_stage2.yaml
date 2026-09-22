@@ -4,6 +4,8 @@ pytorch_data_dir: 'datasets'
 
 # Dataset args
 dataset: "sa1b"
+# Max number of training images to use (SA-1B only). Set to null to use every image found.
+sample_size: 1000000
 
 # Model Args
 model_type: "dinov2"
