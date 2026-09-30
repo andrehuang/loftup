@@ -26,7 +26,7 @@ from pytorch_lightning.strategies import DDPStrategy
 from torch.utils.data import DataLoader
 from torchvision.transforms import InterpolationMode
 
-from upsamplers import get_upsampler, load_upsampler_weights, norm, unnorm
+from upsamplers import get_upsampler, norm, unnorm
 from datasets import get_dataset
 from featurizers import get_featurizer
 from utils import (
@@ -128,7 +128,7 @@ class LoftUpStage2(pl.LightningModule):
             p.requires_grad = False
 
         # Initialize upsampler
-        self.upsampler = get_upsampler(upsampler, self.dim, n_freqs=self.n_freqs, cfg=cfg)
+        self.upsampler = get_upsampler(upsampler, self.dim, lr_size=self.final_size, n_freqs=self.n_freqs, cfg=cfg)
 
         # Initialize downsampler
         if downsampler == 'attention':
@@ -148,19 +148,18 @@ class LoftUpStage2(pl.LightningModule):
 
         # Initialize EMA for upsampler (hardcoded to always be active)
         if self.pretrained_upsampler is not None:
-            # Load pretrained weights
-            self.upsampler = load_upsampler_weights(self.upsampler, self.pretrained_upsampler)
-            self.ema_upsampler = None
-            print(f"Using pretrained upsampler weights. Upsampler type: {upsampler}. No EMA.")
+            # Load stage-1 weights; both the student and the EMA teacher start from them
+            ckpt_weight = torch.load(self.pretrained_upsampler, map_location="cpu")['state_dict']
+            upsampler_weight = {k[len('upsampler.'):]: v for k, v in ckpt_weight.items() if k.startswith('upsampler.')}
+            self.upsampler.load_state_dict(upsampler_weight)
+            print(f"Using pretrained upsampler weights. Upsampler type: {upsampler}. EMA teacher initialized from them.")
+            self.ema_update_after = 0
+        elif self.use_crop_upsampler:
+            self.ema_update_after = 0
         else:
-            # Use EMA for upsampler training
-            if self.use_crop_upsampler:
-                self.ema_update_after = 0
-                self.crop_upsampler = EMA(self.upsampler, beta=0.99, update_after_step=self.ema_update_after, update_every=10)
-            else:
-                # When there is no pretrained upsampler, we can still use EMA for the upsampler
-                self.ema_update_after = 1000
-                self.crop_upsampler = EMA(self.upsampler, beta=0.99, update_after_step=self.ema_update_after, update_every=10)
+            # Training from scratch: let the upsampler warm up before the EMA teacher is used
+            self.ema_update_after = 1000
+        self.crop_upsampler = EMA(self.upsampler, beta=0.99, update_after_step=self.ema_update_after, update_every=10)
 
         self.automatic_optimization = False
 
@@ -464,7 +463,7 @@ def my_app(cfg: DictConfig) -> None:
         hr_res=cfg.hr_res,
         hr_weight=cfg.hr_weight,
         consistency_method=cfg.consistency_method,
-        pretrained_upsampler=cfg.pretrained_upsampler,
+        pretrained_upsampler=cfg.pretrained_upsampler if ifpretrained else None,
         affinity_loss=cfg.affinity_loss,
         rec_weight=cfg.rec_weight,
         l1_affinity=cfg.l1_affinity,
